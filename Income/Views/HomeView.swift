@@ -13,46 +13,35 @@ struct HomeView: View {
 	@State private var showEditTransactionView = false
 	@State private var transactionToEdit: Transaction?
 	
-	var expenses : String {
-		var sumExpenses = 0.0
-		transactions.forEach {
-			if $0.type == .expense {
-				sumExpenses += $0.amount
-			}
-		}
+	private var expenses : String {
+		let sumExpenses = transactions.filter({ $0.type == .expense }).reduce(0) { $0 + $1.amount }
 		let numberFormatter = NumberFormatter()
 		numberFormatter.numberStyle = .currency
 		numberFormatter.currencySymbol = "US$"
-		return numberFormatter.string(from: sumExpenses as NSNumber) ?? "US$0.0"
+		return numberFormatter.string(from: sumExpenses as NSNumber) ?? "US$0.00"
 	}
 	
-	var income : String {
-		var sumIncome = 0.0
-		transactions.forEach {
-			if $0.type == .income {
-				sumIncome += $0.amount
-			}
-		}
+	private var income : String {
+		let sumIncome = transactions.filter({ $0.type == .income }).reduce(0) { $0 + $1.amount }
 		let numberFormatter = NumberFormatter()
 		numberFormatter.numberStyle = .currency
 		numberFormatter.currencySymbol = "US$"
-		return numberFormatter.string(from: sumIncome as NSNumber) ?? "US$0.0"
+		return numberFormatter.string(from: sumIncome as NSNumber) ?? "US$0.00"
 	}
 	
-	var balance: String {
-		var total = 0.0
-		transactions.forEach {
-			switch $0.type {
+	private var balance: String {
+		let total = transactions.reduce(0) {
+			switch $1.type {
 			case .income:
-				total += $0.amount
+				$0 + $1.amount
 			case .expense:
-				total -= $0.amount
+				$0 - $1.amount
 			}
 		}
 		let numberFormatter = NumberFormatter()
 		numberFormatter.numberStyle = .currency
 		numberFormatter.currencySymbol = "US$"
-		return numberFormatter.string(from: total as NSNumber) ?? "US$0.0"
+		return numberFormatter.string(from: total as NSNumber) ?? "US$0.00"
 	}
 	
 	fileprivate func FloatingButton() -> some View {
