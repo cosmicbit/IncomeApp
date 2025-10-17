@@ -9,12 +9,51 @@ import SwiftUI
 
 struct HomeView: View {
 	
-	@State private var transactions: [Transaction] = [
-		Transaction(title: "Apple", type: .expense, amount: 5.00, date: Date()),
-		Transaction(title: "Apple", type: .expense, amount: 5.00, date: Date())
-	]
+	@State private var transactions: [Transaction] = []
 	@State private var showEditTransactionView = false
 	@State private var transactionToEdit: Transaction?
+	
+	var expenses : String {
+		var sumExpenses = 0.0
+		transactions.forEach {
+			if $0.type == .expense {
+				sumExpenses += $0.amount
+			}
+		}
+		let numberFormatter = NumberFormatter()
+		numberFormatter.numberStyle = .currency
+		numberFormatter.currencySymbol = "US$"
+		return numberFormatter.string(from: sumExpenses as NSNumber) ?? "US$0.0"
+	}
+	
+	var income : String {
+		var sumIncome = 0.0
+		transactions.forEach {
+			if $0.type == .income {
+				sumIncome += $0.amount
+			}
+		}
+		let numberFormatter = NumberFormatter()
+		numberFormatter.numberStyle = .currency
+		numberFormatter.currencySymbol = "US$"
+		return numberFormatter.string(from: sumIncome as NSNumber) ?? "US$0.0"
+	}
+	
+	var balance: String {
+		var total = 0.0
+		transactions.forEach {
+			switch $0.type {
+			case .income:
+				total += $0.amount
+			case .expense:
+				total -= $0.amount
+			}
+		}
+		let numberFormatter = NumberFormatter()
+		numberFormatter.numberStyle = .currency
+		numberFormatter.currencySymbol = "US$"
+		return numberFormatter.string(from: total as NSNumber) ?? "US$0.0"
+	}
 	
 	fileprivate func FloatingButton() -> some View {
 		VStack {
@@ -39,11 +78,11 @@ struct HomeView: View {
 				.fill(.primaryLightGreen)
 			VStack(alignment: .leading, spacing: 8) {
 				HStack {
-					VStack {
+					VStack(alignment: .leading) {
 						Text("BALANCE")
 							.font(.caption)
 							.foregroundStyle(.white)
-						Text("$2")
+						Text("\(balance)")
 							.font(.system(size: 42, weight: .light))
 							.foregroundStyle(.white)
 					}
@@ -56,7 +95,7 @@ struct HomeView: View {
 						Text("Expense")
 							.font(.system(size: 15, weight: .semibold))
 							.foregroundStyle(.white)
-						Text("$22")
+						Text("\(expenses)")
 							.font(.system(size: 15, weight: .regular))
 							.foregroundStyle(.white)
 					}
@@ -65,7 +104,7 @@ struct HomeView: View {
 						Text("Income")
 							.font(.system(size: 15, weight: .semibold))
 							.foregroundStyle(.white)
-						Text("$22")
+						Text("\(income)")
 							.font(.system(size: 15, weight: .regular))
 							.foregroundStyle(.white)
 					}
@@ -113,7 +152,6 @@ struct HomeView: View {
 						Image(systemName: "gearshape.fill")
 							.foregroundStyle(.black)
 					}
-
 				}
 			}
 		}
