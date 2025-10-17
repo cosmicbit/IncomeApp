@@ -16,6 +16,7 @@ struct AddTransactionView: View {
 	@State private var alertMessage = ""
 	@State private var showAlert = false
 	@Binding var transactions: [Transaction]
+	var transactionToEdit: Transaction?
 	@Environment(\.dismiss) var dismiss
 	
 	var numberFormatter: NumberFormatter {
@@ -55,10 +56,21 @@ struct AddTransactionView: View {
 				}
 				
 				let transaction = Transaction(title: transactionTitle, type: selectedTransactionType, amount: amount, date: Date())
-				transactions.append(transaction)
+				if let transactionToEdit = transactionToEdit {
+					guard let indexOfTransaction = transactions.firstIndex(of: transactionToEdit) else {
+						alertTitle = "Something went wrong"
+						alertMessage = "Cannot update this transaction right now."
+						showAlert = true
+						return
+					}
+					let updatedTransaction = Transaction(title: transactionTitle, type: selectedTransactionType, amount: amount, date: transactionToEdit.date)
+					transactions[indexOfTransaction] = updatedTransaction
+				} else {
+					transactions.append(transaction)
+				}
 				dismiss()
 			} label: {
-				Text("Create")
+				Text(transactionToEdit == nil ? "Create" : "Update")
 					.font(.system(size: 15, weight: .semibold))
 					.foregroundStyle(.white)
 					.frame(height: 40)
@@ -71,6 +83,13 @@ struct AddTransactionView: View {
 			Spacer()
         }
 		.padding(.top)
+		.onAppear(perform: {
+			if let transactionToEdit = transactionToEdit {
+				amount = transactionToEdit.amount
+				transactionTitle = transactionToEdit.title
+				selectedTransactionType = transactionToEdit.type
+			}
+		})
 		.alert(alertTitle, isPresented: $showAlert) {
 			Button {
 			} label: {
