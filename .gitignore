@@ -1,0 +1,40 @@
+# Xcode
+
+## User settings
+xcuserdata/
+*.xcuserdatad/
+
+## Obj-C/Swift specific
+*.hmap
+
+## App packaging
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+## Playgrounds
+*.playground/
+
+## Swift Package Manager
+
+Packages/
+Package.pins
+Package.resolved
+
+.build/
+
+# Carthage
+
+Carthage/Checkouts
+Carthage/Build/
+
+# fastlane
+
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Xcode
+.DS_Store
+
