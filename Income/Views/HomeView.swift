@@ -121,6 +121,7 @@ struct HomeView: View {
 									.foregroundStyle(.black)
 							}
 						}
+						.onDelete(perform: delete)
 					}
 					.scrollContentBackground(.hidden)
 				}
@@ -145,6 +146,10 @@ struct HomeView: View {
 			}
 		}
     }
+	
+	private func delete(at offset: IndexSet) {
+		transactions.remove(atOffsets: offset)
+	}
 }
 
 #Preview {
