@@ -14,11 +14,21 @@ struct HomeView: View {
 	@State private var transactionToEdit: Transaction?
 	@State private var showSettings = false
 	
+	@AppStorage("orderDescending") var orderDescending = false
+	@AppStorage("currency") var currency = Currency.usd
+	@AppStorage("filterMinimum") private var filterMinimum = 0.0
+	
+	private var displayTransactions: [Transaction] {
+		let sortedTransactions = orderDescending ? transactions.sorted(by: { $0.date < $1.date }) : transactions.sorted(by: { $0.date > $1.date })
+		let filteredTransactions = sortedTransactions.filter { $0.amount > filterMinimum }
+		return filteredTransactions
+	}
+	
 	private var expenses : String {
 		let sumExpenses = transactions.filter({ $0.type == .expense }).reduce(0) { $0 + $1.amount }
 		let numberFormatter = NumberFormatter()
 		numberFormatter.numberStyle = .currency
-		numberFormatter.currencySymbol = "US$"
+		numberFormatter.locale = currency.locale
 		return numberFormatter.string(from: sumExpenses as NSNumber) ?? "US$0.00"
 	}
 	
@@ -26,7 +36,7 @@ struct HomeView: View {
 		let sumIncome = transactions.filter({ $0.type == .income }).reduce(0) { $0 + $1.amount }
 		let numberFormatter = NumberFormatter()
 		numberFormatter.numberStyle = .currency
-		numberFormatter.currencySymbol = "US$"
+		numberFormatter.locale = currency.locale
 		return numberFormatter.string(from: sumIncome as NSNumber) ?? "US$0.00"
 	}
 	
@@ -41,7 +51,7 @@ struct HomeView: View {
 		}
 		let numberFormatter = NumberFormatter()
 		numberFormatter.numberStyle = .currency
-		numberFormatter.currencySymbol = "US$"
+		numberFormatter.locale = currency.locale
 		return numberFormatter.string(from: total as NSNumber) ?? "US$0.00"
 	}
 	
@@ -114,7 +124,7 @@ struct HomeView: View {
 				VStack {
 					BalanceView()
 					List {
-						ForEach(transactions) { transaction in
+						ForEach(displayTransactions) { transaction in
 							Button {
 								transactionToEdit = transaction
 							} label: {

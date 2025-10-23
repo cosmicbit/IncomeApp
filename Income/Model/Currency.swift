@@ -5,7 +5,9 @@
 //  Created by Philips on 22/10/25.
 //
 
-enum Currency: CaseIterable, Identifiable {
+import Foundation
+
+enum Currency: Int, CaseIterable, Identifiable {
 	var id: Self {self}
 	case usd, pounds
 	
@@ -15,6 +17,15 @@ enum Currency: CaseIterable, Identifiable {
 			"USD"
 		case .pounds:
 			"Pounds"
+		}
+	}
+	
+	var locale: Locale {
+		switch self {
+		case .usd:
+			Locale(identifier: "en_US")
+		case .pounds:
+			Locale(identifier: "en_GB")
 		}
 	}
 }
