@@ -8,7 +8,7 @@
 import SwiftUI
 
 struct TransactionView: View {
-	let transaction: Transaction
+	let transaction: TransactionItem
 	@AppStorage("currency") private var currency = Currency.usd
 	
 	var body: some View {
@@ -23,12 +23,12 @@ struct TransactionView: View {
 			.background(.lightGreyShade)
 			.clipShape(RoundedRectangle(cornerRadius: 5))
 			HStack {
-				Image(systemName: transaction.type == .income ? "arrow.up.forward" : "arrow.down.forward")
+				Image(systemName: transaction.wrappedTransactonType == .income ? "arrow.up.forward" : "arrow.down.forward")
 					.font(.system(size: 16, weight: .bold))
-					.foregroundStyle(transaction.type == .income ? Color.green : Color.red)
+					.foregroundStyle(transaction.wrappedTransactonType == .income ? Color.green : Color.red)
 				VStack(alignment: .leading, spacing: 5) {
 					HStack {
-						Text(transaction.title)
+						Text(transaction.wrappedTitle)
 							.font(.system(size: 15, weight: .bold))
 						Spacer()
 						Text(String(transaction.displayAmount(currency: currency)))
@@ -44,6 +44,6 @@ struct TransactionView: View {
 	}
 }
 
-#Preview {
-    TransactionView(transaction: Transaction(title: "Apple", type: .expense, amount: 5.00, date: Date()))
-}
+//#Preview {
+//    TransactionView(transaction: Transaction(title: "Apple", type: .expense, amount: 5.00, date: Date()))
+//}
