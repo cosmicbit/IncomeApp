@@ -10,25 +10,23 @@ import CoreData
 
 struct HomeView: View {
 	
-	@State private var transactions: [Transaction] = []
-	@State private var showEditTransactionView = false
 	@State private var transactionToEdit: TransactionItem?
 	@State private var showSettings = false
 	
 	@Environment(\.managedObjectContext) private var viewContext
-	@FetchRequest(sortDescriptors: []) var transactionsCoreData: FetchedResults<TransactionItem>
+	@FetchRequest(sortDescriptors: []) var transactions: FetchedResults<TransactionItem>
 	@AppStorage("orderDescending") var orderDescending = false
 	@AppStorage("currency") var currency = Currency.usd
 	@AppStorage("filterMinimum") private var filterMinimum = 0.0
 	
 	private var displayTransactions: [TransactionItem] {
-		let sortedTransactions = orderDescending ? transactionsCoreData.sorted(by: { $0.wrappedDate < $1.wrappedDate }) : transactionsCoreData.sorted(by: { $0.wrappedDate > $1.wrappedDate })
+		let sortedTransactions = orderDescending ? transactions.sorted(by: { $0.wrappedDate < $1.wrappedDate }) : transactions.sorted(by: { $0.wrappedDate > $1.wrappedDate })
 		let filteredTransactions = sortedTransactions.filter { $0.amount > filterMinimum }
 		return filteredTransactions
 	}
 	
 	private var expenses : String {
-		let sumExpenses = transactionsCoreData.filter({ $0.wrappedTransactonType == .expense }).reduce(0) { $0 + $1.amount }
+		let sumExpenses = transactions.filter({ $0.wrappedTransactonType == .expense }).reduce(0) { $0 + $1.amount }
 		let numberFormatter = NumberFormatter()
 		numberFormatter.numberStyle = .currency
 		numberFormatter.locale = currency.locale
@@ -36,7 +34,7 @@ struct HomeView: View {
 	}
 	
 	private var income : String {
-		let sumIncome = transactionsCoreData.filter({ $0.wrappedTransactonType == .income }).reduce(0) { $0 + $1.amount }
+		let sumIncome = transactions.filter({ $0.wrappedTransactonType == .income }).reduce(0) { $0 + $1.amount }
 		let numberFormatter = NumberFormatter()
 		numberFormatter.numberStyle = .currency
 		numberFormatter.locale = currency.locale
@@ -44,7 +42,7 @@ struct HomeView: View {
 	}
 	
 	private var balance: String {
-		let total = transactionsCoreData.reduce(0) {
+		let total = transactions.reduce(0) {
 			switch $1.wrappedTransactonType {
 			case .income:
 				$0 + $1.amount
@@ -163,7 +161,7 @@ struct HomeView: View {
 	
 	private func delete(at offsets: IndexSet) {
 		for index in offsets {
-			let transactionToDelete =  transactionsCoreData[index]
+			let transactionToDelete =  transactions[index]
 			viewContext.delete(transactionToDelete)
 		}
 		
@@ -171,5 +169,6 @@ struct HomeView: View {
 }
 
 #Preview {
-    HomeView()
+	let dataManager = DataManager.sharedPreview
+	return HomeView().environment(\.managedObjectContext, dataManager.container.viewContext)
 }
