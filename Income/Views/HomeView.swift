@@ -5,6 +5,7 @@
 //  Created by Philips on 17/10/25.
 //
 
+
 import SwiftUI
 import SwiftData
 
@@ -171,5 +172,7 @@ struct HomeView: View {
 }
 
 #Preview {
-    HomeView()
+    let previewContainer = PreviewHelper.previewContainer
+    return HomeView()
+        .modelContainer(previewContainer)
 }
