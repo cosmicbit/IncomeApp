@@ -10,10 +10,8 @@ import SwiftData
 
 struct HomeView: View {
 	
-	@State private var transactions: [Transaction] = []
-    @Query var transactionSwiftData: [TransactionModel]
+    @Query var transactions: [TransactionModel]
     
-	@State private var showEditTransactionView = false
 	@State private var transactionToEdit: TransactionModel?
 	@State private var showSettings = false
 	
@@ -24,13 +22,13 @@ struct HomeView: View {
     @Environment(\.modelContext) private var context
 	
 	private var displayTransactions: [TransactionModel] {
-		let sortedTransactions = orderDescending ? transactionSwiftData.sorted(by: { $0.date < $1.date }) : transactionSwiftData.sorted(by: { $0.date > $1.date })
+		let sortedTransactions = orderDescending ? transactions.sorted(by: { $0.date < $1.date }) : transactions.sorted(by: { $0.date > $1.date })
 		let filteredTransactions = sortedTransactions.filter { $0.amount > filterMinimum }
 		return filteredTransactions
 	}
 	
 	private var expenses : String {
-		let sumExpenses = transactionSwiftData.filter({ $0.type == .expense }).reduce(0) { $0 + $1.amount }
+		let sumExpenses = transactions.filter({ $0.type == .expense }).reduce(0) { $0 + $1.amount }
 		let numberFormatter = NumberFormatter()
 		numberFormatter.numberStyle = .currency
 		numberFormatter.locale = currency.locale
@@ -38,7 +36,7 @@ struct HomeView: View {
 	}
 	
 	private var income : String {
-		let sumIncome = transactionSwiftData.filter({ $0.type == .income }).reduce(0) { $0 + $1.amount }
+		let sumIncome = transactions.filter({ $0.type == .income }).reduce(0) { $0 + $1.amount }
 		let numberFormatter = NumberFormatter()
 		numberFormatter.numberStyle = .currency
 		numberFormatter.locale = currency.locale
@@ -46,7 +44,7 @@ struct HomeView: View {
 	}
 	
 	private var balance: String {
-		let total = transactionSwiftData.reduce(0) {
+		let total = transactions.reduce(0) {
 			switch $1.type {
 			case .income:
 				$0 + $1.amount
@@ -64,7 +62,7 @@ struct HomeView: View {
 		VStack {
 			Spacer()
 			NavigationLink {
-				AddTransactionView(transactions: $transactions)
+				AddTransactionView()
 			} label: {
 				Text("+")
 					.font(.largeTitle)
@@ -145,10 +143,7 @@ struct HomeView: View {
 			}
 			.navigationTitle("Income")
 			.navigationDestination(item: $transactionToEdit, destination: { transactionToEdit in
-				AddTransactionView(transactions: $transactions, transactionToEdit: transactionToEdit)
-			})
-			.navigationDestination(isPresented: $showEditTransactionView, destination: {
-				AddTransactionView(transactions: $transactions)
+				AddTransactionView(transactionToEdit: transactionToEdit)
 			})
 			.sheet(isPresented: $showSettings, content: {
 				SettingsView()
@@ -168,7 +163,7 @@ struct HomeView: View {
 	
 	private func delete(at offsets: IndexSet) {
         for index in offsets {
-            let transactionToDelete = transactionSwiftData[index]
+            let transactionToDelete = transactions[index]
             context.delete(transactionToDelete)
             try? context.save()
         }
