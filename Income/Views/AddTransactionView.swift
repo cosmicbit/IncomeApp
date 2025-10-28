@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct AddTransactionView: View {
 	
@@ -16,8 +17,10 @@ struct AddTransactionView: View {
 	@State private var alertMessage = ""
 	@State private var showAlert = false
 	@Binding var transactions: [Transaction]
-	var transactionToEdit: Transaction?
+	var transactionToEdit: TransactionModel?
 	@Environment(\.dismiss) var dismiss
+    @Environment(\.modelContext) private var context
+    
 	@AppStorage("currency") private var currency = Currency.usd
 	
 	var numberFormatter: NumberFormatter {
@@ -56,18 +59,19 @@ struct AddTransactionView: View {
 					return
 				}
 				
-				let transaction = Transaction(title: transactionTitle, type: selectedTransactionType, amount: amount, date: Date())
 				if let transactionToEdit = transactionToEdit {
-					guard let indexOfTransaction = transactions.firstIndex(of: transactionToEdit) else {
-						alertTitle = "Something went wrong"
-						alertMessage = "Cannot update this transaction right now."
-						showAlert = true
-						return
-					}
-					let updatedTransaction = Transaction(title: transactionTitle, type: selectedTransactionType, amount: amount, date: transactionToEdit.date)
-					transactions[indexOfTransaction] = updatedTransaction
+                    transactionToEdit.title = transactionTitle
+                    transactionToEdit.type = selectedTransactionType
+                    transactionToEdit.amount = amount
 				} else {
-					transactions.append(transaction)
+                    let transaction = TransactionModel(
+                        id: UUID(),
+                        title: transactionTitle,
+                        type: selectedTransactionType,
+                        amount: amount,
+                        date: Date()
+                    )
+                    context.insert(transaction)
 				}
 				dismiss()
 			} label: {

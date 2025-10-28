@@ -6,26 +6,29 @@
 //
 
 import SwiftUI
+import SwiftData
 
 struct HomeView: View {
 	
 	@State private var transactions: [Transaction] = []
+    @Query var transactionSwiftData: [TransactionModel]
+    
 	@State private var showEditTransactionView = false
-	@State private var transactionToEdit: Transaction?
+	@State private var transactionToEdit: TransactionModel?
 	@State private var showSettings = false
 	
 	@AppStorage("orderDescending") var orderDescending = false
 	@AppStorage("currency") var currency = Currency.usd
 	@AppStorage("filterMinimum") private var filterMinimum = 0.0
 	
-	private var displayTransactions: [Transaction] {
-		let sortedTransactions = orderDescending ? transactions.sorted(by: { $0.date < $1.date }) : transactions.sorted(by: { $0.date > $1.date })
+	private var displayTransactions: [TransactionModel] {
+		let sortedTransactions = orderDescending ? transactionSwiftData.sorted(by: { $0.date < $1.date }) : transactionSwiftData.sorted(by: { $0.date > $1.date })
 		let filteredTransactions = sortedTransactions.filter { $0.amount > filterMinimum }
 		return filteredTransactions
 	}
 	
 	private var expenses : String {
-		let sumExpenses = transactions.filter({ $0.type == .expense }).reduce(0) { $0 + $1.amount }
+		let sumExpenses = transactionSwiftData.filter({ $0.type == .expense }).reduce(0) { $0 + $1.amount }
 		let numberFormatter = NumberFormatter()
 		numberFormatter.numberStyle = .currency
 		numberFormatter.locale = currency.locale
@@ -33,7 +36,7 @@ struct HomeView: View {
 	}
 	
 	private var income : String {
-		let sumIncome = transactions.filter({ $0.type == .income }).reduce(0) { $0 + $1.amount }
+		let sumIncome = transactionSwiftData.filter({ $0.type == .income }).reduce(0) { $0 + $1.amount }
 		let numberFormatter = NumberFormatter()
 		numberFormatter.numberStyle = .currency
 		numberFormatter.locale = currency.locale
@@ -41,7 +44,7 @@ struct HomeView: View {
 	}
 	
 	private var balance: String {
-		let total = transactions.reduce(0) {
+		let total = transactionSwiftData.reduce(0) {
 			switch $1.type {
 			case .income:
 				$0 + $1.amount
