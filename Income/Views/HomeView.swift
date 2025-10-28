@@ -20,6 +20,8 @@ struct HomeView: View {
 	@AppStorage("orderDescending") var orderDescending = false
 	@AppStorage("currency") var currency = Currency.usd
 	@AppStorage("filterMinimum") private var filterMinimum = 0.0
+    
+    @Environment(\.modelContext) private var context
 	
 	private var displayTransactions: [TransactionModel] {
 		let sortedTransactions = orderDescending ? transactionSwiftData.sorted(by: { $0.date < $1.date }) : transactionSwiftData.sorted(by: { $0.date > $1.date })
@@ -164,8 +166,12 @@ struct HomeView: View {
 		}
     }
 	
-	private func delete(at offset: IndexSet) {
-		transactions.remove(atOffsets: offset)
+	private func delete(at offsets: IndexSet) {
+        for index in offsets {
+            let transactionToDelete = transactionSwiftData[index]
+            context.delete(transactionToDelete)
+            try? context.save()
+        }
 	}
 }
 
